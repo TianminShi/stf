@@ -66,6 +66,7 @@ public class StfClassLoader extends ClassLoader {
     // This is needed so that the default properties for an extension can be found.
     private HashMap<String, String> loadedClassToProjectMap = new HashMap<String, String>();
 
+    private static StfClassLoader instance;
 
     public StfClassLoader(ClassLoader parent) {
         super(parent);
@@ -80,6 +81,7 @@ public class StfClassLoader extends ClassLoader {
         // and the same class loader, and not this one, will be used to load everything else.
         String currentProjectLocation = this.getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
         projectRoots = new String[] { currentProjectLocation };
+        instance = this;
     }
 
 
@@ -345,43 +347,41 @@ public class StfClassLoader extends ClassLoader {
      * @throws StfException if the reflection based call failed.
      */
     public static String getProjectName(String className) throws StfException {
-        String methodName = "internalGetProjectName";
         try {
-            ClassLoader cl = StfClassLoader.class.getClassLoader();
-            Method method = cl.getClass().getMethod(methodName, new Class[] { String.class });
-            Object result = method.invoke(cl, new Object[] { className } );
+            StfClassLoader stfClassLoader = getInstance();
+            String result = stfClassLoader.internalGetProjectName(className);
             if (result == null) {
                 throw new StfException("Failed to find project owning class: " + className);
             }
-            return (String) result;
+            return result;
         } catch (Exception e) {
-            throw new StfException("Failed to invoke method: " + methodName, e);
+            throw new StfException("Failed to invoke method: internalGetProjectName", e);
         }
     }
     
     // Tell the class loader which project directories we can load classes from.
     public static void setClassRoots(ArrayList<String> projectRoots) throws StfException {
-        String methodName = "internalSetClassRoots";
         try {
-            ClassLoader stfClassLoader = StfClassLoader.class.getClassLoader();
-            Method method = stfClassLoader.getClass().getMethod(methodName, new Class[] { String[].class });
+            StfClassLoader stfClassLoader = getInstance();
             String[] projectRootsAsArray = projectRoots.toArray(new String[] {});
-            method.invoke(stfClassLoader, new Object[]{ projectRootsAsArray });
+            stfClassLoader.internalSetClassRoots(projectRootsAsArray);
         } catch (Exception e) {
-            throw new StfException("Failed to invoke method: " + methodName, e);
+            throw new StfException("Failed to invoke method: internalSetClassRoots", e);
         }
     }
     
     // Tell the stf class loader which jar files the plugin needs to use.
     public static void setJarPath(HashSet<String> jarsUsed) throws StfException {
-        String methodName = "internalSetJarPath";
         try {
-            ClassLoader stfClassLoader = StfClassLoader.class.getClassLoader();
-            Method method = stfClassLoader.getClass().getMethod(methodName, new Class[] { String[].class });
+            StfClassLoader stfClassLoader = getInstance();
             String[] jarsUsedAsArray = jarsUsed.toArray(new String[] {});
-            method.invoke(stfClassLoader, new Object[]{ jarsUsedAsArray });
+            stfClassLoader.internalSetJarPath(jarsUsedAsArray);
         } catch (Exception e) {
-            throw new StfException("Failed to invoke method: " + methodName, e);
+            throw new StfException("Failed to invoke method: internalSetJarPath", e);
         }
+    }
+
+    private static StfClassLoader getInstance() {
+        return instance;
     }
 }
