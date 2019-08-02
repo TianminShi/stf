@@ -60,7 +60,7 @@ if (!-e $stf_personal_properties) {
 
 # Locate the properties for this customisation of STF
 # Note: directory name is passed into abs_path to workaround old perl bug.
-my $stf_defaults = abs_path($Bin . "/../config") . "/stf.properties";
+my $stf_defaults =  Cygwin::posix_to_win_path(abs_path($Bin . "/../config") . "/stf.properties");
 
 # Tell STF argument handling about the property files
 stfArguments::set_argument_data($stf_personal_properties, $stf_defaults);
@@ -406,7 +406,7 @@ my ($now, $date, $time) = stf::stfUtility->getNow(date => $TRUE, time => $TRUE);
     
     
     # Write the stf arguments to a properties file
-    my $stf_parameters = $test_dir . "/stf_parameters.properties";
+    my $stf_parameters = Cygwin::posix_to_win_path($test_dir . "/stf_parameters.properties");
     stfArguments::write_arguments_to_file $stf_parameters, $Bin, $updated_test_root, $updated_systemtest_prereqs;
 
     # Move to the output directory
@@ -427,11 +427,12 @@ my ($now, $date, $time) = stf::stfUtility->getNow(date => $TRUE, time => $TRUE);
     my $sep = stf::stfUtility->getPathSeparator;
     my $log4j_core_dir = findElement($prereqs_root, "/log4j-2.3/log4j-core-2.3.jar");
     my $log4j_api_dir = findElement($prereqs_root, "/log4j-2.3/log4j-api-2.3.jar");
+    my $stf_core_dir = Cygwin::posix_to_win_path(findElement("$Bin/..", "/bin"));
     my $cmd = "$javahome_generation/bin/java " .
               "$java_debug_settings" .
               " -Dlog4j.skipJansi=true" .  # Suppress warning on Windows
               " -Djava.system.class.loader=net.adoptopenjdk.stf.runner.StfClassLoader" .
-              " -classpath $log4j_api_dir" . $sep . "$log4j_core_dir" . $sep . "$Bin/../bin" .
+              " -classpath \"$log4j_api_dir" . $sep . "$log4j_core_dir" . $sep . "$stf_core_dir\"" .
               " net.adoptopenjdk.stf.runner.StfRunner" .
               " -properties \"$stf_parameters, $stf_personal_properties, $stf_defaults\"" .
               " -testDir \"$test_dir\"";
@@ -731,7 +732,7 @@ sub check_free_space {
     my $cmd = "";
     my @df_output = ();
     print "Retrieving amount of free space on drive containing " .  $results_root . "\n";
-    if ($^O eq 'MSWin32') {
+    if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
         # dir doesn't work with forward slashes or escaped backslashes, so remove any that are there.
         $results_root =~ s,/,\\,g;
         $results_root =~ s,\\\\,\\,g;

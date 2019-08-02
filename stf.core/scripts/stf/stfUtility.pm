@@ -192,7 +192,7 @@ sub getPathSeparator {
     my ($self) = @_;
 
     my $ps = ":";
-    if ($^O eq 'MSWin32') {
+    if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
         $ps = ";";
     }
 
@@ -223,8 +223,11 @@ sub getPlatform {
     elsif ($^O eq 'aix') {
         return "aix";
     }
-        elsif ($^O eq 'darwin') {
+    elsif ($^O eq 'darwin') {
         return "osx";
+    }
+    elsif ($^O eq 'cygwin') {
+        return "linux";
     }
     else {
         die "Platform $^O is not yet supported";
