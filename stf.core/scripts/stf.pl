@@ -48,7 +48,7 @@ $ENV{'loggingLevel'} = "WARN";
 # This value is used for results-root, unless an alternative directory is specified on the command line. 
 $ENV{'STF_TEMP'} = '/tmp/stf';
 if ( $^O eq 'MSWin32' ) {
-	$ENV{'STF_TEMP'} = 'C:\stf_temp';
+    $ENV{'STF_TEMP'} = 'C:\stf_temp';
 }
 
 # Locate the users optional STF property file
@@ -89,42 +89,42 @@ my $prereqs_root_validator = "/junit-4.12";
 # If that fails, we default to [home directory]/systemtest_prereqs.
 
 if($prereqs_root eq "null") {
-	if (defined $ENV{'SYSTEMTEST_PREREQS_ROOT'}) {
-		#If we have an environment variable, use that.
-		$prereqs_root = $ENV{'SYSTEMTEST_PREREQS_ROOT'};
-	} else {
-		# If systemtest-prereqs was not supplied at all, we search for it up the path.
-		my $prereqs_search = Cwd::abs_path($0);
-		my $search_finished = "no";
-		my $asciiOrEbcdic = "ascii";
-		if (stf::stfUtility::getPlatform() eq "zos") {
-			$asciiOrEbcdic = "ebcdic";
-		}
-		print "systemtest-prereqs not specified. Attempting to locate along the current working directory path.\n";
-		while (!($search_finished eq "yes")) {
-			if (-d "$prereqs_search/systemtest_prereqs$prereqs_root_validator") {
-				$prereqs_root = $prereqs_search . "/systemtest_prereqs";
-				$search_finished = "yes";
-			} elsif(-d ($prereqs_search . "/prereqs/$asciiOrEbcdic/systemtest_prereqs$prereqs_root_validator")) {
-				$prereqs_root = $prereqs_search . "/prereqs/$asciiOrEbcdic/systemtest_prereqs";
-				$search_finished = "yes";
-			} elsif(($prereqs_search =~ /^[A-Za-z]\:\\*$/) or ($prereqs_search =~ /^\/*$/)) {
-				print "Unable to find systemtest-prereqs along the current working directory path.\n";
-				$prereqs_root = stfArguments::get_home_dir() . "/systemtest_prereqs";
-				print "Defaulting to [home_directory]/systemtest_prereqs: " . $prereqs_root . "\n";
-				$search_finished = "yes";
-			} else {
-				# Go up a step and try again.
-				my @prereqs_search_array = File::Spec->splitdir($prereqs_search);
-				pop @prereqs_search_array;
-				$prereqs_search = File::Spec->catdir(@prereqs_search_array);
-			}
-		}
-		if (!($prereqs_root eq (stfArguments::get_home_dir() . "/systemtest_prereqs"))) {
-			print "systemtest-prereqs was found here: " . $prereqs_root . "\n";
-		}
-		$ENV{'SYSTEMTEST_PREREQS_ROOT'} = $prereqs_root;
-	}
+    if (defined $ENV{'SYSTEMTEST_PREREQS_ROOT'}) {
+        #If we have an environment variable, use that.
+        $prereqs_root = $ENV{'SYSTEMTEST_PREREQS_ROOT'};
+    } else {
+        # If systemtest-prereqs was not supplied at all, we search for it up the path.
+        my $prereqs_search = Cwd::abs_path($0);
+        my $search_finished = "no";
+        my $asciiOrEbcdic = "ascii";
+        if (stf::stfUtility::getPlatform() eq "zos") {
+            $asciiOrEbcdic = "ebcdic";
+        }
+        print "systemtest-prereqs not specified. Attempting to locate along the current working directory path.\n";
+        while (!($search_finished eq "yes")) {
+            if (-d "$prereqs_search/systemtest_prereqs$prereqs_root_validator") {
+                $prereqs_root = $prereqs_search . "/systemtest_prereqs";
+                $search_finished = "yes";
+            } elsif(-d ($prereqs_search . "/prereqs/$asciiOrEbcdic/systemtest_prereqs$prereqs_root_validator")) {
+                $prereqs_root = $prereqs_search . "/prereqs/$asciiOrEbcdic/systemtest_prereqs";
+                $search_finished = "yes";
+            } elsif(($prereqs_search =~ /^[A-Za-z]\:\\*$/) or ($prereqs_search =~ /^\/*$/)) {
+                print "Unable to find systemtest-prereqs along the current working directory path.\n";
+                $prereqs_root = stfArguments::get_home_dir() . "/systemtest_prereqs";
+                print "Defaulting to [home_directory]/systemtest_prereqs: " . $prereqs_root . "\n";
+                $search_finished = "yes";
+            } else {
+                # Go up a step and try again.
+                my @prereqs_search_array = File::Spec->splitdir($prereqs_search);
+                pop @prereqs_search_array;
+                $prereqs_search = File::Spec->catdir(@prereqs_search_array);
+            }
+        }
+        if (!($prereqs_root eq (stfArguments::get_home_dir() . "/systemtest_prereqs"))) {
+            print "systemtest-prereqs was found here: " . $prereqs_root . "\n";
+        }
+        $ENV{'SYSTEMTEST_PREREQS_ROOT'} = $prereqs_root;
+    }
 }
 
 #Now we validate each of the systemtest-prereqs we have, and make their directories absolute in case we change directory.
@@ -197,8 +197,8 @@ if ( length $retain_number ) {
 # We are only going to remove results_root if it passes some basic checks.
 # So check its structure to verify it contains STF artifacts.
 if (-e $results_root) {
-	my @files = <'$results_root/*'>;
-	my $count = @files;
+    my @files = <'$results_root/*'>;
+    my $count = @files;
     if ($count == 0) { 
         # No child directories yet, so structure is good
         $delete_results_root = $TRUE;
@@ -206,37 +206,37 @@ if (-e $results_root) {
         # Found one or more child files/directories.
         # Check that they are all STF directories.
         foreach my $suspect_file (@files) {
-	        if (-d $suspect_file) {
-		    	# Check contents of old results directory, if it is not empty
-		    	my @subfiles = <'$suspect_file/*'>;
-				my $subfiles_count = @subfiles; 
-				if ($subfiles_count == 0) {
-				    print "Warning: Found empty results directory: $suspect_file\n";
-					$delete_results_root = $TRUE;
-				} else {
-			        # Check the structure of the old test directory, to see if it contains expected STF files 
-			        my $setup_dir    = $suspect_file . "/setUp";
-			        my $execute_dir  = $suspect_file . "/execute";
-			        my $teardown_dir = $suspect_file . "/tearDown";
-			        if (-d $setup_dir && -d $execute_dir && -d $teardown_dir) {
-			            $delete_results_root = $TRUE;
-			        } else {
-						print "**FAILED** results directory '$suspect_file' does not contain expected setUp, execute and tearDown directories\n";
-						$delete_results_root = $FALSE;
-						last;
-			        }
-				}
-				
-				# Keep track of all result directories (allows deletion of oldest)
-				if (! -l $suspect_file) {
-					push @results_dirs, $suspect_file;
-				}
-			} else {
-				print "**FAILED** unexpected file found at '$suspect_file'. Results-root at '$results_root' is not a STF results directory\n";
-				$delete_results_root = $FALSE;
-				last;
-			}
-		}
+            if (-d $suspect_file) {
+                # Check contents of old results directory, if it is not empty
+                my @subfiles = <'$suspect_file/*'>;
+                my $subfiles_count = @subfiles;
+                if ($subfiles_count == 0) {
+                    print "Warning: Found empty results directory: $suspect_file\n";
+                    $delete_results_root = $TRUE;
+                } else {
+                    # Check the structure of the old test directory, to see if it contains expected STF files
+                    my $setup_dir    = $suspect_file . "/setUp";
+                    my $execute_dir  = $suspect_file . "/execute";
+                    my $teardown_dir = $suspect_file . "/tearDown";
+                    if (-d $setup_dir && -d $execute_dir && -d $teardown_dir) {
+                        $delete_results_root = $TRUE;
+                    } else {
+                        print "**FAILED** results directory '$suspect_file' does not contain expected setUp, execute and tearDown directories\n";
+                        $delete_results_root = $FALSE;
+                        last;
+                    }
+                }
+
+                # Keep track of all result directories (allows deletion of oldest)
+                if (! -l $suspect_file) {
+                    push @results_dirs, $suspect_file;
+                }
+            } else {
+                print "**FAILED** unexpected file found at '$suspect_file'. Results-root at '$results_root' is not a STF results directory\n";
+                $delete_results_root = $FALSE;
+                last;
+            }
+        }
     }
 } else { # results-root does not exist
     $delete_results_root = $TRUE;
@@ -248,7 +248,7 @@ if ($delete_results_root == $FALSE) {
     # List files in the alleged STF directory to allow debugging
     print "Files/Directories at results root:\n";
     print "  " . describe_file($results_root) . " " . "$results_root\n";
-	my @files = <'$results_root/*'>;
+    my @files = <'$results_root/*'>;
     foreach my $file (@files) {
         print "    " . describe_file($file) . " " . "$file\n";
         if (-d $file) {
@@ -259,7 +259,7 @@ if ($delete_results_root == $FALSE) {
         }
     }
     
-	# We don't want to trash a box just because of an incorrect argument, so abort the run
+    # We don't want to trash a box just because of an incorrect argument, so abort the run
     print "Abort: Can't proceed as the results-root at '$results_root' does not appear to be a valid STF results directory\n"; 
     exit 1;
 }
@@ -287,13 +287,13 @@ my $symlink_supported = eval { symlink("",""); 1 };
 
 # Now remove any orphaned symbolic links
 if (defined $symlink_supported && $symlink_supported eq 1) {
-	my @results_dir_content = <'$results_root/*'>;
+    my @results_dir_content = <'$results_root/*'>;
     foreach my $file (@results_dir_content) {
         # Check to see if the current file is a link which has no directory
-    	if (-l $file && ! -d $file) {
-    	    _log("Deleting orphan results link: $file");
-    	    unlink $file;
-    	}
+        if (-l $file && ! -d $file) {
+            _log("Deleting orphan results link: $file");
+            unlink $file;
+        }
     }
 }
 
@@ -310,7 +310,7 @@ foreach my $file (@files) {
         # Found a directory which is not a symbolic link.
         # See if it contains a timestamp, eg /stf/20160706-092421-list
         if ($file =~ /20[0-9]{6}-[0-9]{6}/) {
-        	$num_result_dirs++;
+            $num_result_dirs++;
         }  
     }
 }
@@ -338,7 +338,7 @@ my $createResultsSymLinks = stfArguments::get_argument("create-results-sym-links
 if (defined $symlink_supported && $symlink_supported eq 1 && $createResultsSymLinks ne 'false') {
     my $new_link_name = $results_root . "/$test_name";
     unlink $new_link_name; 
-	symlink($test_dir, $new_link_name);
+    symlink($test_dir, $new_link_name);
 }
 
 # On Windows, assign T: to the test directory.
@@ -378,50 +378,50 @@ if (defined $symlink_supported && $symlink_supported eq 1 && $createResultsSymLi
 # Check whether we have enough space available.  If not inform the user and fail the test.
 my $mb_free = check_free_space ($results_root);
 if ( $mb_free < 3072 ) {
-	print "
+    print "
 Test machine has only $mb_free Mb free on drive containing $results_root.\n
 There must be at least 3Gb (3072Mb) free to be sure of capturing diagnostics
 files in the event of a test failure.\n
 Exiting.\n";
-	exit 1;
+    exit 1;
 }
 
 
 # $now used as a unique id
 my ($now, $date, $time) = stf::stfUtility->getNow(date => $TRUE, time => $TRUE);
 
-	output_banner("GENERATION");
+    output_banner("GENERATION");
 
     # if any test root starts with '..' then resolve it now, before we change directory
     my $test_root = stfArguments::get_argument("test-root");
-	my $updated_test_root = make_paths_absolute("test-root",$test_root,"");
+    my $updated_test_root = make_paths_absolute("test-root",$test_root,"");
     
     
     # Abort run if any test root contains a space character.
     # (This causes lots of class loading problems on windows)
     if ($test_root =~ / /) {
-	    _log("**FAILED** STF cannot use any test root with a space character in its path: $test_root\n");
-	    exit 1;
-	}
+        _log("**FAILED** STF cannot use any test root with a space character in its path: $test_root\n");
+        exit 1;
+    }
     
     
     # Write the stf arguments to a properties file
     my $stf_parameters = $test_dir . "/stf_parameters.properties";
     stfArguments::write_arguments_to_file $stf_parameters, $Bin, $updated_test_root, $updated_systemtest_prereqs;
 
-	# Move to the output directory
-	chdir($generation_dir);
+    # Move to the output directory
+    chdir($generation_dir);
 
     # Decide if java debug has been enabled
-	my $java_debug_settings = "";
+    my $java_debug_settings = "";
     if (stfArguments::get_boolean_argument("debug-generation")) {
         $java_debug_settings = stfArguments::get_argument("java-debug-args");
-	}
+    }
 
-	# Find the location of java to be used in the generation step
-	my $javahome_generation = stfArguments::get_and_check_argument("javahome-generation");
-	validate_jvm($javahome_generation, "javahome-generation");
-	
+    # Find the location of java to be used in the generation step
+    my $javahome_generation = stfArguments::get_and_check_argument("javahome-generation");
+    validate_jvm($javahome_generation, "javahome-generation");
+
     # Build the command to run RunTestRunner - to generate the setup, execute and teardown scripts.
     # The generation step needs a custom class loader so that classes used by the plugin can be loaded.
     my $sep = stf::stfUtility->getPathSeparator;
@@ -438,7 +438,7 @@ my ($now, $date, $time) = stf::stfUtility->getNow(date => $TRUE, time => $TRUE);
 
     _log("Starting process to generate scripts: $cmd");
     my ($rc, $process) = stf::Commands->run_process(
-          	mnemonic  => "GEN",
+            mnemonic  => "GEN",
             command   => $cmd,
             logName   => "$generation_dir" . "/generation",
             uid       => $now,
@@ -452,14 +452,14 @@ my ($now, $date, $time) = stf::stfUtility->getNow(date => $TRUE, time => $TRUE);
 
     # If we are just running to provide help or a list of all tests then finish.
     if ($help_arg ne 'false') {
-	    exit 0;
-	}   
+        exit 0;
+    }
     if ($test_list_arg ne 'false') {
-	    exit 0;
-	}   
-	
-	
-	_log("");
+        exit 0;
+    }
+
+
+    _log("");
     _log("Script generation completed");
     _log("");
    
@@ -477,8 +477,8 @@ my ($now, $date, $time) = stf::stfUtility->getNow(date => $TRUE, time => $TRUE);
     my $setupCmd    = "perl $test_dir/setUp.pl";
     my $teardownCmd = "perl $test_dir/tearDown.pl";
    
-	my $dry_run = stfArguments::get_boolean_argument("dry-run");
-	if ($dry_run) {
+    my $dry_run = stfArguments::get_boolean_argument("dry-run");
+    if ($dry_run) {
         _log("*Not* executing scripts, as dryRun mode set");
         _log("Commands to execute scripts are:");
         _log("  $setupCmd");
@@ -530,22 +530,22 @@ my ($now, $date, $time) = stf::stfUtility->getNow(date => $TRUE, time => $TRUE);
         reportStageResult("teardown", $rc_setup, $longestStageName);
 
         # Output an overall pass/fail status message
-   		my $rc_overall = $rc_setup + $rc_execute_total + $rc_teardown;
-   		_log("");
-   		if ($rc_overall == 0) {
-	        _log("Overall result: PASSED");
-	        # If the --rm-pass option was specified, delete the results directory because the test passed.
-	        if (stfArguments::get_boolean_argument("rm-pass")) {
-	            _log("Deleting the results directory because no failures were detected.");
-	            chdir $results_root;
-	            deleteDirectory($test_dir);
-	        }
-	    } else {
-	    	$rc_overall = 1;
-	        _log("Overall result: **FAILED**");
-	    }
-	    
-	    exit $rc_overall; 
+        my $rc_overall = $rc_setup + $rc_execute_total + $rc_teardown;
+        _log("");
+        if ($rc_overall == 0) {
+            _log("Overall result: PASSED");
+            # If the --rm-pass option was specified, delete the results directory because the test passed.
+            if (stfArguments::get_boolean_argument("rm-pass")) {
+                _log("Deleting the results directory because no failures were detected.");
+                chdir $results_root;
+                deleteDirectory($test_dir);
+            }
+        } else {
+            $rc_overall = 1;
+            _log("Overall result: **FAILED**");
+        }
+
+        exit $rc_overall;
    }
 
 
@@ -575,8 +575,8 @@ sub runScript {
     my $script_name = shift;
 
     _log("");
-	output_banner($script_name);
-	
+    output_banner($script_name);
+
     _log("Running $script_name: $script");
     
     my $return_code = 0;
@@ -639,7 +639,7 @@ sub output_banner {
         }
     }
 
-	# Build full banner text
+    # Build full banner text
     my $bannerLine = "$highlight   $formattedBannerText   $highlight";
     
     _log($bannerLine);
@@ -674,11 +674,11 @@ sub validate_jvm {
  
     _log("Checking JVM: $javahome" );
 
-	# Process execution goes wrong if java installed into a directory with spaces. Prevent execution.
+    # Process execution goes wrong if java installed into a directory with spaces. Prevent execution.
     if ($javahome =~ / /) {
-	    _log("**FAILED** Cannot run due to space character in \$JAVA_HOME: $javahome\n");
-	    exit 1;
-	}
+        _log("**FAILED** Cannot run due to space character in \$JAVA_HOME: $javahome\n");
+        exit 1;
+    }
     
     # Firstly check that there is 'java' file in the expected place below javahome
     if (!-e "$javahome/bin/java" && !-e "$javahome/bin/java.exe" ) {
@@ -725,60 +725,60 @@ sub check_free_space {
 
     my $results_root = shift;
 
-	my $bytes_free = 0;
-	my $kb_free = 0;
-	my $mb_free = 0;
-	my $cmd = "";
-	my @df_output = ();
-	print "Retrieving amount of free space on drive containing " .  $results_root . "\n";
-	if ($^O eq 'MSWin32') {
-		# dir doesn't work with forward slashes or escaped backslashes, so remove any that are there.
-		$results_root =~ s,/,\\,g;
-		$results_root =~ s,\\\\,\\,g;
-		$cmd = "cmd /c dir $results_root";
-		@df_output = `$cmd 2>&1`;
-		foreach my $line ( @df_output ) {
-			if ( $line =~ m/.*bytes\s+free.*/ ) {
-				#               3 Dir(s)  214,264,049,664 bytes free
-				( $bytes_free ) = $line =~ /.*Dir\(s\)\s+(.*)\s+bytes\s+free.*$/;
-				$bytes_free =~ s/\,//g;
-				$kb_free = int ($bytes_free / 1024);
-			}
-		}
-	}
-	else {
-		$cmd = "df -k $results_root";
-		my @df_output = `$cmd 2>&1`;
-		my $df_header = $df_output[0];
-		my $df_body;
+    my $bytes_free = 0;
+    my $kb_free = 0;
+    my $mb_free = 0;
+    my $cmd = "";
+    my @df_output = ();
+    print "Retrieving amount of free space on drive containing " .  $results_root . "\n";
+    if ($^O eq 'MSWin32') {
+        # dir doesn't work with forward slashes or escaped backslashes, so remove any that are there.
+        $results_root =~ s,/,\\,g;
+        $results_root =~ s,\\\\,\\,g;
+        $cmd = "cmd /c dir $results_root";
+        @df_output = `$cmd 2>&1`;
+        foreach my $line ( @df_output ) {
+            if ( $line =~ m/.*bytes\s+free.*/ ) {
+                #               3 Dir(s)  214,264,049,664 bytes free
+                ( $bytes_free ) = $line =~ /.*Dir\(s\)\s+(.*)\s+bytes\s+free.*$/;
+                $bytes_free =~ s/\,//g;
+                $kb_free = int ($bytes_free / 1024);
+            }
+        }
+    }
+    else {
+        $cmd = "df -k $results_root";
+        my @df_output = `$cmd 2>&1`;
+        my $df_header = $df_output[0];
+        my $df_body;
 
-		for (my $i=1; $i<=$#df_output; $i++){
-     		$df_body .= $df_output[$i];
-     	}
-		
-		if ( $df_header =~ m/.*Filesystem\s+1K-blocks.*/ ) {
-			( $kb_free ) = $df_body =~ /[^\s]*\s+\d+\s+\d+\s+(\d+).*/;
-		}
-		elsif ( $df_header =~ m/.*Filesystem\s+1024-blocks.*/ ) {
-			( $kb_free ) = $df_body =~ /[^\s]*\s+\d+\s+(\d+).*/;
-		}
-		elsif ( $df_header =~ m/.*Mounted on\s+Filesystem.*/ ) {
-			( $kb_free ) = $df_body =~ /[^\s]*\s+[^\s]+\s+(\d+)\/.*/;
-		}
-		else {
-			print "Unable to parse $cmd output:\n";
-			foreach my $line ( @df_output ) {
-				print $line;
-			}
-			die "Unable to determine amount of free space for test results, terminating\n";
-		}
-	}
-	$mb_free = int ($kb_free / 1024);
+        for (my $i=1; $i<=$#df_output; $i++){
+            $df_body .= $df_output[$i];
+        }
 
-	die "Unable to determine amount of free space for test results, terminating\n" unless (defined $kb_free);
+        if ( $df_header =~ m/.*Filesystem\s+1K-blocks.*/ ) {
+            ( $kb_free ) = $df_body =~ /[^\s]*\s+\d+\s+\d+\s+(\d+).*/;
+        }
+        elsif ( $df_header =~ m/.*Filesystem\s+1024-blocks.*/ ) {
+            ( $kb_free ) = $df_body =~ /[^\s]*\s+\d+\s+(\d+).*/;
+        }
+        elsif ( $df_header =~ m/.*Mounted on\s+Filesystem.*/ ) {
+            ( $kb_free ) = $df_body =~ /[^\s]*\s+[^\s]+\s+(\d+)\/.*/;
+        }
+        else {
+            print "Unable to parse $cmd output:\n";
+            foreach my $line ( @df_output ) {
+                print $line;
+            }
+            die "Unable to determine amount of free space for test results, terminating\n";
+        }
+    }
+    $mb_free = int ($kb_free / 1024);
 
-	print "There is $mb_free Mb free\n";
-	return $mb_free;
+    die "Unable to determine amount of free space for test results, terminating\n" unless (defined $kb_free);
+
+    print "There is $mb_free Mb free\n";
+    return $mb_free;
 }
 
 # Parameters: parameter name, list of paths, inner folder
@@ -794,29 +794,29 @@ sub check_free_space {
 # or make_paths_absolute("test-roots","/tmp/p1","");
 
 sub make_paths_absolute { 
-	my $parameter_name = shift;
-	my $stringOfPaths = shift;
-	my $innerFolder = shift;
-	
-	my $absolutePaths = $stringOfPaths;
-	
-	if (!($stringOfPaths eq "null")) {
-		my @paths_array = split(/;/,$stringOfPaths);
-		my $one_path;
-		my $found_inner_dir = "false";
-		foreach $one_path (@paths_array)
-		{
-			$one_path = Cwd::abs_path($one_path);
-			die "The " . $parameter_name . " directory " . $one_path . " could not be found. \n" unless (-d "$one_path"); 
-			if (-d "$one_path$innerFolder") {
-				$found_inner_dir = "true";
-			}
-		}
-		$absolutePaths = join(';',@paths_array);
-		die "The " . $parameter_name . " paths (\"" . $stringOfPaths . "\") are not valid because none of their absolute equivalents (\"" . $absolutePaths . "\") contain the inner directory \"$innerFolder\"\n" unless ($found_inner_dir eq "true"); 
-	}
+    my $parameter_name = shift;
+    my $stringOfPaths = shift;
+    my $innerFolder = shift;
+
+    my $absolutePaths = $stringOfPaths;
+
+    if (!($stringOfPaths eq "null")) {
+        my @paths_array = split(/;/,$stringOfPaths);
+        my $one_path;
+        my $found_inner_dir = "false";
+        foreach $one_path (@paths_array)
+        {
+            $one_path = Cwd::abs_path($one_path);
+            die "The " . $parameter_name . " directory " . $one_path . " could not be found. \n" unless (-d "$one_path");
+            if (-d "$one_path$innerFolder") {
+                $found_inner_dir = "true";
+            }
+        }
+        $absolutePaths = join(';',@paths_array);
+        die "The " . $parameter_name . " paths (\"" . $stringOfPaths . "\") are not valid because none of their absolute equivalents (\"" . $absolutePaths . "\") contain the inner directory \"$innerFolder\"\n" unless ($found_inner_dir eq "true");
+    }
     
-	return $absolutePaths;
+    return $absolutePaths;
 }
 
 # Takes a string of one or more paths, separated by semicolons, 
@@ -827,30 +827,30 @@ sub make_paths_absolute {
 # E.g. findElement("/tmp/a;/tmp/b","/potato") might return "/tmp/b/potato"
 
 sub findElement {
-	my $stringOfPaths = shift;
-	my $elementName = shift;
-	
-	my $elementPath = "null";
-	my @paths_array = split(/;/,$stringOfPaths);
-	my $one_path;
-	
-	foreach $one_path (@paths_array)
-	{
-		if ((-e "$one_path$elementName") and ($elementPath eq "null")) {
-			$elementPath = "$one_path$elementName";
-		}
-	}
-	die "Could not find " . $elementName . " in any of these supplied paths: " . $stringOfPaths . "\n" unless (!($elementPath eq "null")); 
-	    
-	return $elementPath;
+    my $stringOfPaths = shift;
+    my $elementName = shift;
+
+    my $elementPath = "null";
+    my @paths_array = split(/;/,$stringOfPaths);
+    my $one_path;
+
+    foreach $one_path (@paths_array)
+    {
+        if ((-e "$one_path$elementName") and ($elementPath eq "null")) {
+            $elementPath = "$one_path$elementName";
+        }
+    }
+    die "Could not find " . $elementName . " in any of these supplied paths: " . $stringOfPaths . "\n" unless (!($elementPath eq "null"));
+
+    return $elementPath;
 }
 
 # Takes a single directory and attempts to delete it, along with any contents.
 
 sub deleteDirectory {
-	my $doomed_directory = shift;
-	if ( $^O eq 'MSWin32' ) {
-        	my $cmd = "cmd /c rmdir /s /q \"$doomed_directory\"";
+    my $doomed_directory = shift;
+    if ( $^O eq 'MSWin32' ) {
+            my $cmd = "cmd /c rmdir /s /q \"$doomed_directory\"";
             `$cmd`;
             if ( $? ) {
                 die "Error running $cmd: $!";
